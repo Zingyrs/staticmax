@@ -84,7 +84,7 @@
 
         .logo-container {
             text-align: center; /* Центрирует логотип внутри себя */
-            margin-bottom: var(--spacing-4xl); /* Увеличенный отступ снизу для дополнительного пространства */
+            margin-bottom: calc(var(--spacing-4xl) + var(--spacing-xl)); /* Увеличенный отступ снизу для дополнительного пространства */
             padding-top: var(--spacing-lg); /* Отступ сверху как у предыдущего header */
         }
 
@@ -118,6 +118,9 @@
             width: 100%; /* Карточки занимают всю ширину списка */
             max-width: 340px; /* Ограничиваем максимальную ширину для центрирования */
             text-align: center; /* Центрируем содержимое карточки */
+            min-height: 120px; /* Устанавливаем минимальную высоту для всех карточек */
+            display: flex; /* Используем flex для внутреннего содержимого */
+            align-items: center; /* Центрируем содержимое по вертикали */
         }
         
         .card:active {
@@ -140,6 +143,7 @@
             gap: var(--spacing-lg);
             position: relative;
             z-index: 1;
+            width: 100%;
         }
         
         .card-icon {
@@ -295,4 +299,3 @@
     </div>
 </body>
 </html>
-
