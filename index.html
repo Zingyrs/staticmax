@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#ffffff">
+    <title>Красноярскэнергосбыт</title>
+    <style>
+        /* CSS Variables для поддержки светлой и тёмной тем */
+        :root {
+            /* Основные цвета */
+            --bg-color: #ffffff;
+            --secondary-bg-color: #f5f7fa;
+            --text-color: #1e293b;
+            --secondary-text-color: #64748b;
+            --accent-color: #ff6b35;
+            --accent-secondary: #003d82;
+            --border-color: #e8ecf1;
+            --card-bg: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.06);
+            
+            /* Типографика */
+            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-size-base: 16px;
+            --font-size-title: 20px;
+            --font-size-caption: 13px;
+            
+            /* Отступы (модульная сетка 4px) */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 12px;
+            --spacing-lg: 16px;
+            --spacing-xl: 20px;
+            --spacing-2xl: 24px;
+            
+            /* Радиусы */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* Тени */
+            --shadow-sm: 0 1px 4px var(--shadow-color);
+            --shadow-md: 0 2px 8px var(--shadow-color);
+        }
+        
+        /* Тёмная тема */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --secondary-bg-color: #0f0f0f;
+                --text-color: #f8fafc;
+                --secondary-text-color: #94a3b8;
+                --border-color: #2d3748;
+                --card-bg: #252525;
+                --shadow-color: rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: var(--spacing-lg);
+            /* Safe Area для учёта вырезов экрана */
+            padding-top: max(var(--spacing-lg), env(safe-area-inset-top));
+            padding-bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
+            padding-left: max(var(--spacing-lg), env(safe-area-inset-left));
+            padding-right: max(var(--spacing-lg), env(safe-area-inset-right));
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .header {
+            margin-bottom: var(--spacing-2xl);
+            padding-top: var(--spacing-sm);
+        }
+        
+        .header-title {
+            font-size: var(--font-size-title);
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: var(--spacing-xs);
+            letter-spacing: -0.02em;
+        }
+        
+        .header-subtitle {
+            font-size: var(--font-size-caption);
+            color: var(--secondary-text-color);
+            font-weight: 400;
+        }
+        
+        .button-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+        
+        .button {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-lg);
+            background-color: var(--card-bg);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            min-height: 56px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Активное состояние для touch-устройств */
+        .button:active {
+            transform: scale(0.98);
+            background-color: var(--secondary-bg-color);
+        }
+        
+        /* Hover эффект для desktop */
+        @media (hover: hover) {
+            .button:hover {
+                background-color: var(--secondary-bg-color);
+                border-color: var(--accent-color);
+            }
+            
+            .button:hover .button-arrow {
+                transform: translateX(4px);
+            }
+        }
+        
+        .button-content {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            flex: 1;
+        }
+        
+        .button-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+        
+        .button:nth-child(1) .button-icon {
+            background-color: rgba(255, 107, 53, 0.1);
+            color: var(--accent-color);
+        }
+        
+        .button:nth-child(2) .button-icon {
+            background-color: rgba(0, 61, 130, 0.1);
+            color: var(--accent-secondary);
+        }
+        
+        .button:nth-child(3) .button-icon {
+            background-color: rgba(255, 107, 53, 0.1);
+            color: var(--accent-color);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .button:nth-child(1) .button-icon {
+                background-color: rgba(255, 107, 53, 0.2);
+            }
+            
+            .button:nth-child(2) .button-icon {
+                background-color: rgba(0, 122, 255, 0.2);
+                color: #0a84ff;
+            }
+            
+            .button:nth-child(3) .button-icon {
+                background-color: rgba(255, 107, 53, 0.2);
+            }
+        }
+        
+        .button-text {
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            color: var(--text-color);
+            line-height: 1.4;
+        }
+        
+        .button-arrow {
+            font-size: 20px;
+            color: var(--secondary-text-color);
+            transition: transform 0.2s ease;
+            margin-left: var(--spacing-sm);
+        }
+        
+        .footer {
+            margin-top: var(--spacing-2xl);
+            text-align: center;
+            color: var(--secondary-text-color);
+            font-size: var(--font-size-caption);
+        }
+        
+        /* Адаптация для малых экранов */
+        @media (max-width: 375px) {
+            body {
+                padding: var(--spacing-md);
+            }
+            
+            .button {
+                padding: var(--spacing-md);
+                min-height: 52px;
+            }
+            
+            .button-icon {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .button-text {
+                font-size: 15px;
+            }
+        }
+        
+        /* Оптимизация производительности анимаций */
+        .button,
+        .button-arrow {
+            will-change: transform;
+        }
+        
+        /* Убираем outline на touch-устройствах */
+        @media (pointer: coarse) {
+            *:focus {
+                outline: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="header-title">Красноярскэнергосбыт</h1>
+            <p class="header-subtitle">Сервисы для клиентов</p>
+        </header>
+        
+        <nav class="button-list" role="navigation">
+            <a href="https://krsk-sbit.ru/chastnym-klientam/distantsionnye-servisy/zapis-v-ofis/" 
+               class="button"
+               role="button">
+                <div class="button-content">
+                    <div class="button-icon" aria-hidden="true">📅</div>
+                    <span class="button-text">Запись в офис</span>
+                </div>
+                <span class="button-arrow" aria-hidden="true">›</span>
+            </a>
+            
+            <a href="https://krsk-sbit.ru/napisat-obrashchenie/" 
+               class="button"
+               role="button">
+                <div class="button-content">
+                    <div class="button-icon" aria-hidden="true">✉️</div>
+                    <span class="button-text">Написать обращение</span>
+                </div>
+                <span class="button-arrow" aria-hidden="true">›</span>
+            </a>
+            
+            <a href="https://krsk-sbit.ru/company/deyatelnost/dopolnitelnye-uslugi/" 
+               class="button"
+               role="button">
+                <div class="button-content">
+                    <div class="button-icon" aria-hidden="true">🛒</div>
+                    <span class="button-text">Заказ услуг</span>
+                </div>
+                <span class="button-arrow" aria-hidden="true">›</span>
+            </a>
+        </nav>
+        
+        <footer class="footer">
+            ПАО «Красноярскэнергосбыт»
+        </footer>
+    </div>
+</body>
+</html>
