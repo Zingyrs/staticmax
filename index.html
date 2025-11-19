@@ -6,26 +6,28 @@
     <meta name="theme-color" content="#ffffff">
     <title>Красноярскэнергосбыт</title>
     <style>
-        /* CSS Variables для поддержки светлой и тёмной тем */
+        /* CSS Variables - Корпоративные цвета РусГидро */
         :root {
-            /* Основные цвета */
-            --bg-color: #ffffff;
-            --secondary-bg-color: #f5f7fa;
-            --text-color: #1e293b;
-            --secondary-text-color: #64748b;
-            --accent-color: #ff6b35;
-            --accent-secondary: #003d82;
-            --border-color: #e8ecf1;
-            --card-bg: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.06);
+            /* Основные фирменные цвета РусГидро */
+            --rushydro-orange: #E66A25;
+            --rushydro-blue: #0066A6;
+            --rushydro-orange-light: #FFE8DC;
+            --rushydro-blue-light: #E6F2FA;
+            
+            /* Цветовая схема */
+            --bg-color: #FAFBFC;
+            --card-bg: #FFFFFF;
+            --text-color: #2C3E50;
+            --secondary-text-color: #7B8794;
+            --border-color: #E8ECEF;
             
             /* Типографика */
             --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            --font-size-base: 16px;
-            --font-size-title: 20px;
-            --font-size-caption: 13px;
+            --font-size-base: 17px;
+            --font-size-title: 22px;
+            --font-size-caption: 14px;
             
-            /* Отступы (модульная сетка 4px) */
+            /* Отступы */
             --spacing-xs: 4px;
             --spacing-sm: 8px;
             --spacing-md: 12px;
@@ -34,25 +36,20 @@
             --spacing-2xl: 24px;
             
             /* Радиусы */
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            
-            /* Тени */
-            --shadow-sm: 0 1px 4px var(--shadow-color);
-            --shadow-md: 0 2px 8px var(--shadow-color);
+            --radius-md: 14px;
+            --radius-lg: 18px;
         }
         
         /* Тёмная тема */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #1a1a1a;
-                --secondary-bg-color: #0f0f0f;
-                --text-color: #f8fafc;
-                --secondary-text-color: #94a3b8;
-                --border-color: #2d3748;
-                --card-bg: #252525;
-                --shadow-color: rgba(0, 0, 0, 0.3);
+                --bg-color: #1C1C1E;
+                --card-bg: #2C2C2E;
+                --text-color: #F5F5F7;
+                --secondary-text-color: #98989D;
+                --border-color: #38383A;
+                --rushydro-orange-light: #3D2416;
+                --rushydro-blue-light: #162838;
             }
         }
         
@@ -68,23 +65,25 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             min-height: 100vh;
-            padding: var(--spacing-lg);
-            /* Safe Area для учёта вырезов экрана */
-            padding-top: max(var(--spacing-lg), env(safe-area-inset-top));
-            padding-bottom: max(var(--spacing-lg), env(safe-area-inset-bottom));
-            padding-left: max(var(--spacing-lg), env(safe-area-inset-left));
-            padding-right: max(var(--spacing-lg), env(safe-area-inset-right));
+            display: flex;
+            flex-direction: column;
+            /* Safe Area для iOS */
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
         
         .container {
-            max-width: 400px;
-            margin: 0 auto;
             width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
-            margin-bottom: var(--spacing-2xl);
-            padding-top: var(--spacing-sm);
+            padding: var(--spacing-2xl) var(--spacing-lg) var(--spacing-xl);
+            text-align: center;
         }
         
         .header-title {
@@ -102,142 +101,155 @@
         }
         
         .button-list {
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: var(--spacing-md);
+            padding: 0;
         }
         
         .button {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-lg);
+            padding: var(--spacing-xl) var(--spacing-lg);
             background-color: var(--card-bg);
-            border-radius: var(--radius-md);
             text-decoration: none;
             color: var(--text-color);
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
-            min-height: 56px;
+            transition: all 0.25s ease;
+            min-height: 76px;
             position: relative;
-            overflow: hidden;
+            border: none;
+            width: 100%;
         }
         
-        /* Активное состояние для touch-устройств */
+        .button:first-child {
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        
+        .button:last-child {
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+        
+        .button:only-child {
+            border-radius: var(--radius-lg);
+        }
+        
+        .button::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+        
+        .button:last-child::before {
+            display: none;
+        }
+        
+        /* Активное состояние */
         .button:active {
             transform: scale(0.98);
-            background-color: var(--secondary-bg-color);
+            opacity: 0.7;
         }
         
-        /* Hover эффект для desktop */
+        /* Hover для desktop */
         @media (hover: hover) {
             .button:hover {
-                background-color: var(--secondary-bg-color);
-                border-color: var(--accent-color);
+                background-color: var(--bg-color);
             }
             
             .button:hover .button-arrow {
-                transform: translateX(4px);
+                transform: translateX(6px);
             }
         }
         
         .button-content {
             display: flex;
             align-items: center;
-            gap: var(--spacing-md);
+            gap: var(--spacing-lg);
             flex: 1;
         }
         
         .button-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            font-size: 20px;
+            font-size: 22px;
+            font-weight: 500;
         }
         
+        /* Оранжевые иконки для 1 и 3 кнопок */
         .button:nth-child(1) .button-icon {
-            background-color: rgba(255, 107, 53, 0.1);
-            color: var(--accent-color);
+            background-color: var(--rushydro-orange-light);
+            color: var(--rushydro-orange);
         }
         
+        /* Синяя иконка для 2 кнопки */
         .button:nth-child(2) .button-icon {
-            background-color: rgba(0, 61, 130, 0.1);
-            color: var(--accent-secondary);
+            background-color: var(--rushydro-blue-light);
+            color: var(--rushydro-blue);
         }
         
         .button:nth-child(3) .button-icon {
-            background-color: rgba(255, 107, 53, 0.1);
-            color: var(--accent-color);
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .button:nth-child(1) .button-icon {
-                background-color: rgba(255, 107, 53, 0.2);
-            }
-            
-            .button:nth-child(2) .button-icon {
-                background-color: rgba(0, 122, 255, 0.2);
-                color: #0a84ff;
-            }
-            
-            .button:nth-child(3) .button-icon {
-                background-color: rgba(255, 107, 53, 0.2);
-            }
+            background-color: var(--rushydro-orange-light);
+            color: var(--rushydro-orange);
         }
         
         .button-text {
             font-size: var(--font-size-base);
-            font-weight: 500;
+            font-weight: 400;
             color: var(--text-color);
-            line-height: 1.4;
+            line-height: 1.35;
+            text-align: left;
         }
         
         .button-arrow {
-            font-size: 20px;
+            font-size: 22px;
             color: var(--secondary-text-color);
-            transition: transform 0.2s ease;
-            margin-left: var(--spacing-sm);
+            transition: transform 0.25s ease;
+            margin-left: var(--spacing-md);
+            font-weight: 300;
         }
         
         .footer {
-            margin-top: var(--spacing-2xl);
+            padding: var(--spacing-2xl) var(--spacing-lg);
             text-align: center;
             color: var(--secondary-text-color);
             font-size: var(--font-size-caption);
         }
         
-        /* Адаптация для малых экранов */
+        /* Адаптация для очень малых экранов */
         @media (max-width: 375px) {
-            body {
-                padding: var(--spacing-md);
-            }
-            
             .button {
-                padding: var(--spacing-md);
-                min-height: 52px;
+                padding: var(--spacing-lg);
+                min-height: 72px;
             }
             
             .button-icon {
-                width: 36px;
-                height: 36px;
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
             }
             
             .button-text {
-                font-size: 15px;
+                font-size: 16px;
             }
         }
         
-        /* Оптимизация производительности анимаций */
+        /* Оптимизация производительности */
         .button,
         .button-arrow {
             will-change: transform;
         }
         
-        /* Убираем outline на touch-устройствах */
+        /* Убираем outline на touch */
         @media (pointer: coarse) {
             *:focus {
                 outline: none;
