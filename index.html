@@ -34,6 +34,7 @@
             --spacing-xl: 20px;
             --spacing-2xl: 24px;
             --spacing-3xl: 32px;
+            --spacing-4xl: 48px; /* Добавлен новый размер отступа */
             
             --radius-sm: 10px;
             --radius-md: 14px;
@@ -83,7 +84,7 @@
 
         .logo-container {
             text-align: center; /* Центрирует логотип внутри себя */
-            margin-bottom: var(--spacing-3xl); /* Отступ снизу как у предыдущего header */
+            margin-bottom: var(--spacing-4xl); /* Увеличенный отступ снизу для дополнительного пространства */
             padding-top: var(--spacing-lg); /* Отступ сверху как у предыдущего header */
         }
 
@@ -98,8 +99,10 @@
             display: flex;
             flex-direction: column;
             gap: var(--spacing-md);
+            align-items: center; /* Центрирует карточки по горизонтали */
+            width: 100%; /* Убедитесь, что список занимает всю ширину контейнера */
         }
-        
+
         .card {
             display: block;
             text-decoration: none;
@@ -112,6 +115,9 @@
             overflow: hidden;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
+            width: 100%; /* Карточки занимают всю ширину списка */
+            max-width: 340px; /* Ограничиваем максимальную ширину для центрирования */
+            text-align: center; /* Центрируем содержимое карточки */
         }
         
         .card:active {
@@ -130,6 +136,7 @@
         .card-content {
             display: flex;
             align-items: center;
+            justify-content: center; /* Центрирует содержимое внутри карточки */
             gap: var(--spacing-lg);
             position: relative;
             z-index: 1;
@@ -164,6 +171,7 @@
         
         .card-text {
             flex: 1;
+            text-align: left; /* Возвращаем левое выравнивание текста внутри карточки */
         }
         
         .card-title {
@@ -287,4 +295,3 @@
     </div>
 </body>
 </html>
-
