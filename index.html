@@ -52,7 +52,6 @@
                 --border-color: #334155;
                 --rh-blue-pastel: #1E3A5F;
                 --rh-orange-pastel: #3D2A1F;
-                --rh-blue-light: #1E3A5F;
             }
         }
         
@@ -83,8 +82,10 @@
 
         .logo-container {
             text-align: center;
-            margin-bottom: calc(var(--spacing-4xl) + var(--spacing-xl));
-            padding-top: var(--spacing-lg);
+            /* Уменьшил отступ снизу, чтобы логотип был ближе к кнопкам (было ~68px, стало 24px) */
+            margin-bottom: var(--spacing-2xl);
+            /* Увеличил отступ сверху, чтобы спустить логотип визуально ниже (было 16px, стало 48px) */
+            padding-top: var(--spacing-4xl);
         }
 
         .logo {
@@ -155,19 +156,16 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
         }
         
-        .card:nth-child(1) .card-icon {
+        /* Чередование цветов: нечетные (1, 3) - синие */
+        .card:nth-child(odd) .card-icon {
             background-color: var(--rh-blue-pastel);
             color: var(--rh-blue);
         }
         
-        .card:nth-child(2) .card-icon {
+        /* Чередование цветов: четные (2, 4) - оранжевые */
+        .card:nth-child(even) .card-icon {
             background-color: var(--rh-orange-pastel);
             color: var(--rh-orange);
-        }
-        
-        .card:nth-child(3) .card-icon {
-            background-color: var(--rh-blue-light);
-            color: var(--rh-blue);
         }
         
         .card-text {
@@ -215,7 +213,9 @@
             }
             
             .logo-container {
-                padding-top: var(--spacing-md);
+                /* На маленьких экранах чуть меньше отступ сверху, но все равно спущен */
+                padding-top: var(--spacing-2xl); 
+                margin-bottom: var(--spacing-xl);
             }
 
             .card {
@@ -232,17 +232,6 @@
                 font-size: 16px;
             }
         }
-        
-        .card,
-        .card-arrow {
-            will-change: transform;
-        }
-        
-        @media (pointer: coarse) {
-            *:focus {
-                outline: none;
-            }
-        }
     </style>
 </head>
 <body>
@@ -252,6 +241,7 @@
         </div>
         
         <nav class="card-list" role="navigation">
+            <!-- 1. Запись в офис -->
             <a class="card" 
                href="https://krsk-sbit.ru/chastnym-klientam/distantsionnye-servisy/zapis-v-ofis/"
                role="button">
@@ -265,6 +255,21 @@
                 </div>
             </a>
             
+            <!-- 2. Передать показания -->
+            <a class="card" 
+               href="https://elkfl.krsk-sbit.ru/"
+               role="button">
+                <div class="card-content">
+                    <div class="card-icon" aria-hidden="true">⚡</div>
+                    <div class="card-text">
+                        <div class="card-title">Передать показания</div>
+                        <div class="card-description">Внести текущие данные</div>
+                    </div>
+                    <div class="card-arrow" aria-hidden="true">›</div>
+                </div>
+            </a>
+            
+            <!-- 3. Написать обращение -->
             <a class="card" 
                href="https://krsk-sbit.ru/napisat-obrashchenie/"
                role="button">
@@ -278,6 +283,7 @@
                 </div>
             </a>
             
+            <!-- 4. Заказ услуг -->
             <a class="card" 
                href="https://krsk-sbit.ru/company/deyatelnost/dopolnitelnye-uslugi/"
                role="button">
@@ -291,8 +297,6 @@
                 </div>
             </a>
         </nav>
-        
-
     </div>
 </body>
 </html>
