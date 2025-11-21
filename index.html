@@ -6,7 +6,6 @@
     <meta name="theme-color" content="#ffffff">
     <title>Красноярскэнергосбыт</title>
     <style>
-        /* Фирменные цвета РусГидро */
         :root {
             --rh-blue: #0066A6;
             --rh-orange: #E66A25;
@@ -34,7 +33,7 @@
             --spacing-xl: 20px;
             --spacing-2xl: 24px;
             --spacing-3xl: 32px;
-            --spacing-4xl: 48px; /* Добавлен новый размер отступа */
+            --spacing-4xl: 48px;
             
             --radius-sm: 10px;
             --radius-md: 14px;
@@ -83,24 +82,22 @@
         }
 
         .logo-container {
-            text-align: center; /* Центрирует логотип внутри себя */
-            margin-bottom: calc(var(--spacing-4xl) + var(--spacing-xl)); /* Увеличенный отступ снизу для дополнительного пространства */
-            padding-top: var(--spacing-lg); /* Отступ сверху как у предыдущего header */
+            text-align: center;
+            margin-bottom: calc(var(--spacing-4xl) + var(--spacing-xl));
+            padding-top: var(--spacing-lg);
         }
 
         .logo {
-            max-width: 100%; /* Логотип не выходит за границы контейнера */
-            height: auto; /* Сохраняет пропорции логотипа */
-            /* Установите максимальную высоту, если нужно ограничить размер */
-            /* max-height: 64px; */ /* Пример: ограничить высоту, как у старого .header-icon */
+            max-width: 100%;
+            height: auto;
         }
         
         .card-list {
             display: flex;
             flex-direction: column;
             gap: var(--spacing-md);
-            align-items: center; /* Центрирует карточки по горизонтали */
-            width: 100%; /* Убедитесь, что список занимает всю ширину контейнера */
+            align-items: center;
+            width: 100%;
         }
 
         .card {
@@ -115,12 +112,12 @@
             overflow: hidden;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
-            width: 100%; /* Карточки занимают всю ширину списка */
-            max-width: 340px; /* Ограничиваем максимальную ширину для центрирования */
-            text-align: center; /* Центрируем содержимое карточки */
-            min-height: 120px; /* Устанавливаем минимальную высоту для всех карточек */
-            display: flex; /* Используем flex для внутреннего содержимого */
-            align-items: center; /* Центрируем содержимое по вертикали */
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
         }
         
         .card:active {
@@ -139,7 +136,7 @@
         .card-content {
             display: flex;
             align-items: center;
-            justify-content: center; /* Центрирует содержимое внутри карточки */
+            justify-content: center;
             gap: var(--spacing-lg);
             position: relative;
             z-index: 1;
@@ -175,7 +172,7 @@
         
         .card-text {
             flex: 1;
-            text-align: left; /* Возвращаем левое выравнивание текста внутри карточки */
+            text-align: left;
         }
         
         .card-title {
@@ -218,7 +215,7 @@
             }
             
             .logo-container {
-                padding-top: var(--spacing-md); /* Снижен отступ сверху для моб. версии */
+                padding-top: var(--spacing-md);
             }
 
             .card {
