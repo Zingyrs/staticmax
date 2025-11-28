@@ -18,12 +18,10 @@
             --text-secondary: #64748B;
             --border-color: #E2E8F0;
             
-            /* Фон для группы (светлый в светлой теме, почти прозрачный в темной) */
             --group-bg: rgba(255, 255, 255, 0.6); 
             
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             
-            /* Адаптивные размеры шрифтов */
             --font-size-title: max(14px, 2vh); 
             --font-size-desc: max(11px, 1.4vh);
             --font-size-small: max(10px, 1.2vh);
@@ -41,8 +39,6 @@
                 --border-color: #334155;
                 --rh-blue-pastel: #1E3A5F;
                 --rh-orange-pastel: #3D2A1F;
-                
-                /* В темной теме фон группы едва заметен, чтобы не перекрывать текст */
                 --group-bg: rgba(255, 255, 255, 0.05);
             }
         }
@@ -57,7 +53,7 @@
         html, body {
             height: 100%;
             width: 100%;
-            overflow: hidden; /* Запрет прокрутки */
+            overflow: hidden; 
             background-color: var(--bg-color);
             font-family: var(--font-family);
         }
@@ -69,7 +65,6 @@
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            /* Отступы с учетом безопасных зон экрана */
             padding-top: max(16px, env(safe-area-inset-top));
             padding-bottom: max(16px, env(safe-area-inset-bottom));
             padding-left: max(16px, env(safe-area-inset-left));
@@ -138,6 +133,15 @@
             justify-content: center;
             font-size: 2.5vh;
             flex-shrink: 0;
+            overflow: hidden; /* Чтобы картинка не вылезала за скругления */
+        }
+
+        /* Специфические стили для картинки-иконки */
+        .card-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Заполняет весь квадрат, обрезая лишнее */
+            display: block;
         }
 
         .type-blue .card-icon { background: var(--rh-blue-pastel); color: var(--rh-blue); }
@@ -173,9 +177,8 @@
             opacity: 0.5;
         }
 
-        /* --- ГРУППА ЛК --- */
         .lk-wrapper {
-            flex: 2.4; /* Занимает больше места, чтобы вместить 2 кнопки */
+            flex: 2.4; 
             display: flex;
             flex-direction: column;
             gap: 4px;
@@ -251,7 +254,7 @@
                 </div>
             </a>
 
-            <!-- 4. Услуги (Перемещено сюда) -->
+            <!-- 4. Услуги -->
             <a class="card type-orange" href="https://krsk-sbit.ru/company/deyatelnost/dopolnitelnye-uslugi/">
                 <div class="card-content">
                     <div class="card-icon">🛒</div>
@@ -267,10 +270,13 @@
             <div class="lk-wrapper">
                 <div class="lk-label">Переход в личный кабинет</div>
                 
-                <!-- Баланс -->
+                <!-- Баланс (Иконка картинкой) -->
                 <a class="card type-orange" href="https://elkfl.krsk-sbit.ru/">
                     <div class="card-content">
-                        <div class="card-icon">🪙</div>
+                        <!-- Используем картинку lk.png -->
+                        <div class="card-icon">
+                            <img src="lk.png" alt="ЛК">
+                        </div>
                         <div class="card-text">
                             <div class="card-title">Баланс</div>
                             <div class="card-description">Проверить состояние счета</div>
@@ -279,10 +285,13 @@
                     </div>
                 </a>
                 
-                <!-- Показания -->
+                <!-- Показания (Иконка картинкой) -->
                 <a class="card type-blue" href="https://elkfl.krsk-sbit.ru/">
                     <div class="card-content">
-                        <div class="card-icon">⚡</div>
+                         <!-- Используем картинку lk.png -->
+                        <div class="card-icon">
+                            <img src="lk.png" alt="ЛК">
+                        </div>
                         <div class="card-text">
                             <div class="card-title">Передать показания</div>
                             <div class="card-description">Внести текущие данные</div>
@@ -296,4 +305,3 @@
     </div>
 </body>
 </html>
-
