@@ -101,6 +101,7 @@
             margin-bottom: 20px;
             animation: fadeIn 0.4s ease-out;
         }
+        .section-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .section-block.hidden { display: none; }
 
         @keyframes fadeIn {
@@ -118,6 +119,20 @@
             letter-spacing: 0.5px;
         }
 
+        .select-wrapper {
+            position: relative;
+        }
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 12px;
+            color: var(--text-secondary);
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
         .form-select, .form-input {
             width: 100%;
             padding: 14px;
@@ -129,6 +144,8 @@
             box-sizing: border-box;
             margin-bottom: 10px;
             transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .form-input:focus, .form-select:focus {
@@ -159,6 +176,8 @@
             color: var(--text-primary);
             font-size: var(--font-size-title);
             font-weight: 500;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
         .selection-btn:hover { border-color: var(--rh-blue); }
         .selection-btn.selected {
@@ -173,7 +192,7 @@
             gap: 10px;
         }
         .grid-btn {
-            padding: 12px;
+            padding: 12px 5px;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-form);
             text-align: center;
@@ -181,6 +200,13 @@
             background: var(--card-bg);
             color: var(--text-primary);
             font-weight: 500;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
         }
         .grid-btn:hover { border-color: var(--rh-blue); }
         .grid-btn.selected {
@@ -216,6 +242,7 @@
             justify-content: center;
             align-items: center;
             z-index: 99;
+            flex-direction: column;
         }
         .spinner {
             width: 40px; height: 40px;
@@ -242,6 +269,12 @@
             text-align: center;
             padding: 20px;
         }
+        .success-icon {
+            font-size: 48px;
+            color: var(--rh-orange);
+            margin-bottom: 10px;
+            display: block;
+        }
         .success-box h2 { 
             color: var(--text-primary);
             font-size: calc(var(--font-size-title) + 4px);
@@ -260,9 +293,10 @@
             font-size: var(--font-size-desc);
             margin-bottom: 8px;
         }
-        .ticket-info p strong {
+        .ticket-info strong {
             color: var(--text-secondary);
         }
+        .ticket-highlight { font-size: var(--font-size-title); color: var(--rh-blue) !important; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -278,7 +312,10 @@
         <h1 class="page-title">Запись на прием</h1>
 
         <!-- Лоадер и Ошибки -->
-        <div id="loader" class="loader-overlay hidden"><div class="spinner"></div></div>
+        <div id="loader" class="loader-overlay hidden">
+            <div class="spinner"></div>
+            <p style="font-size:13px; color:white; margin-top:10px">Загрузка...</p>
+        </div>
         <div id="error-box" class="error-msg hidden"></div>
 
         <!-- 1. ТИП КЛИЕНТА -->
@@ -290,19 +327,25 @@
         <!-- 2. РАЙОН -->
         <div id="block-territory" class="section-block hidden">
             <span class="label-title">2. Район</span>
-            <select id="sel-territory" class="form-select"></select>
+            <div class="select-wrapper">
+                <select id="sel-territory" class="form-select"></select>
+            </div>
         </div>
 
         <!-- 3. ОФИС -->
         <div id="block-office" class="section-block hidden">
             <span class="label-title">3. Офис обслуживания</span>
-            <select id="sel-office" class="form-select"></select>
+            <div class="select-wrapper">
+                <select id="sel-office" class="form-select"></select>
+            </div>
         </div>
 
         <!-- 4. ТЕМА -->
         <div id="block-theme" class="section-block hidden">
             <span class="label-title">4. Тема обращения</span>
-            <select id="sel-theme" class="form-select"></select>
+            <div class="select-wrapper">
+                <select id="sel-theme" class="form-select"></select>
+            </div>
         </div>
 
         <!-- 5. ДАТА -->
@@ -320,14 +363,14 @@
         <!-- 7. КОНТАКТЫ -->
         <div id="block-contact" class="section-block hidden">
             <span class="label-title">7. Ваши данные</span>
-            <input type="text" id="inp-fio" class="form-input" placeholder="ФИО (обязательно) *" required>
-            <input type="tel" id="inp-phone" class="form-input" placeholder="Телефон (обязательно) *" maxlength="18" required>
-            <input type="email" id="inp-email" class="form-input" placeholder="Email (для чека)">
+            <input type="text" id="inp-fio" class="form-input" placeholder="ФИО*" required>
+            <input type="tel" id="inp-phone" class="form-input" placeholder="Телефон*" maxlength="18" required>
+            <input type="email" id="inp-email" class="form-input" placeholder="Email">
             
             <button id="btn-get-code" class="btn-sms" onclick="App.sendSms()">Получить код подтверждения</button>
 
-            <div id="sms-area" class="hidden" style="margin-top: 15px;">
-                <label class="label-title">Введите код из СМС:</label>
+            <div id="sms-area" class="hidden" style="margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
+                <span class="label-title">Введите код из СМС:</span>
                 <input type="number" id="inp-code" class="form-input" placeholder="0000">
                 <button id="btn-confirm" class="btn-primary" onclick="App.confirm()">Записаться</button>
             </div>
@@ -336,9 +379,11 @@
         <!-- УСПЕХ -->
         <div id="block-success" class="section-block hidden">
             <div class="success-box">
-                <h2>Вы записаны!</h2>
+                <span class="success-icon">✔</span>
+                <h2 style="margin:0; color:var(--text-primary);">Вы записаны!</h2>
                 <div class="ticket-info">
-                    <p><strong>Талон:</strong> <span id="res-talon"></span></p>
+                    <p><strong>Талон:</strong> <span id="res-talon" class="ticket-highlight"></span></p>
+                    <hr style="border:0; border-top:1px solid var(--border-color); margin:10px 0;">
                     <p><strong>Дата:</strong> <span id="res-date"></span></p>
                     <p><strong>Время:</strong> <span id="res-time"></span></p>
                     <p><strong>Адрес:</strong> <span id="res-addr"></span></p>
@@ -370,12 +415,12 @@ phoneInp.addEventListener('input', function(e) {
 phoneInp.addEventListener('keydown', (e) => {
     if (e.key === 'Backspace' && e.target.value.length <= 4) e.target.value = '';
 });
-
 document.getElementById('inp-fio').addEventListener('input', function() {
     if(this.value.trim()) this.classList.remove('error-border');
 });
 
 
+// --- ПРИЛОЖЕНИЕ ---
 const App = (function() {
     const BASE_URL = "https://testapi.krsk-sbit.ru/new_mobile_api/app.php";
 
@@ -435,10 +480,21 @@ const App = (function() {
             if (jsonIdx !== -1) text = text.substring(jsonIdx);
 
             let json;
-            try { json = JSON.parse(text); } 
-            catch(e) { throw new Error("Ошибка данных от сервера"); }
+            try { 
+                json = JSON.parse(text); 
+            } catch(e) { 
+                console.error("Raw Response:", text);
+                throw new Error("Ошибка данных от сервера"); 
+            }
 
-            if(json.result === 'error') throw new Error(json.errors?.message || "Ошибка API");
+            if(json.result === 'error') {
+                throw new Error(json.errors?.message || "Ошибка API");
+            }
+            
+            if (method === 'getCode') {
+                return json;
+            }
+            
             return json.data;
 
         } catch(err) {
@@ -446,41 +502,29 @@ const App = (function() {
             els.loader.classList.add('hidden');
             els.error.textContent = err.message;
             els.error.classList.remove('hidden');
+            els.error.scrollIntoView({behavior: 'smooth', block: 'center'});
             return null;
         }
     }
 
     function resetBelow(level) {
-        if (level < 1) {
-            els.bTerritory.classList.add('hidden');
-            els.selTerritory.innerHTML = '';
-            booking.territori = null;
+        const blocks = [
+            {el: els.bTerritory, input: els.selTerritory, key: 'territori'},
+            {el: els.bOffice, input: els.selOffice, key: 'office'},
+            {el: els.bTheme, input: els.selTheme, key: 'theme'},
+            {el: els.bDate, input: els.listDate, key: 'date'},
+            {el: els.bTime, input: els.listTime, key: 'time'},
+            {el: els.bContact, input: null, key: null}
+        ];
+
+        for(let i = level; i < blocks.length; i++) {
+            blocks[i].el.classList.add('hidden');
+            if(blocks[i].input) blocks[i].input.innerHTML = '';
+            if(blocks[i].key) booking[blocks[i].key] = null;
         }
-        if (level < 2) {
-            els.bOffice.classList.add('hidden');
-            els.selOffice.innerHTML = '';
-            booking.office = null;
-        }
-        if (level < 3) {
-            els.bTheme.classList.add('hidden');
-            els.selTheme.innerHTML = '';
-            booking.theme = null;
-        }
-        if (level < 4) {
-            els.bDate.classList.add('hidden');
-            els.listDate.innerHTML = '';
-            booking.date = null;
-        }
-        if (level < 5) {
-            els.bTime.classList.add('hidden');
-            els.listTime.innerHTML = '';
-            booking.time = null;
-        }
-        if (level < 6) {
-            els.bContact.classList.add('hidden');
-            els.smsArea.classList.add('hidden');
-            els.btnGetCode.classList.remove('hidden');
-        }
+        
+        els.smsArea.classList.add('hidden');
+        els.btnGetCode.classList.remove('hidden');
     }
 
     async function init() {
@@ -506,7 +550,8 @@ const App = (function() {
     async function loadTerritories() {
         const data = await api('getTerritories');
         if(!data) return;
-        fillSelect(els.selTerritory, data);
+        
+        fillSelectSorted(els.selTerritory, data);
         els.bTerritory.classList.remove('hidden');
         els.selTerritory.onchange = () => {
             booking.territori = els.selTerritory.value;
@@ -521,7 +566,8 @@ const App = (function() {
             clienttype: booking.clienttype
         });
         if(!data) return;
-        fillSelect(els.selOffice, data);
+        
+        fillSelectSorted(els.selOffice, data);
         els.bOffice.classList.remove('hidden');
         els.selOffice.onchange = () => {
             booking.office = els.selOffice.value;
@@ -537,7 +583,8 @@ const App = (function() {
             office: booking.office
         });
         if(!data) return;
-        fillSelect(els.selTheme, data);
+        
+        fillSelectSorted(els.selTheme, data);
         els.bTheme.classList.remove('hidden');
         els.selTheme.onchange = () => {
             booking.theme = els.selTheme.value;
@@ -557,7 +604,7 @@ const App = (function() {
 
         els.listDate.innerHTML = '';
         if (Array.isArray(data) && data.length === 0) {
-            els.error.textContent = "Нет доступных дат";
+            els.error.textContent = "Нет доступных дат для записи";
             els.error.classList.remove('hidden');
             return;
         }
@@ -607,7 +654,7 @@ const App = (function() {
 
     function showContact() {
         els.bContact.classList.remove('hidden');
-        els.bContact.scrollIntoView({behavior: "smooth"});
+        els.bContact.scrollIntoView({behavior: "smooth", block: "start"});
     }
 
     async function sendSms() {
@@ -620,27 +667,19 @@ const App = (function() {
         booking.email = els.inpEmail.value.trim();
 
         let isValid = true;
-        
-        if (!booking.fio) {
-            els.inpFio.classList.add('error-border');
-            isValid = false;
-        } else {
-            els.inpFio.classList.remove('error-border');
-        }
+        if (!booking.fio) { els.inpFio.classList.add('error-border'); isValid = false; }
+        else els.inpFio.classList.remove('error-border');
 
-        if (rawPhone.length < 11) {
-            els.inpPhone.classList.add('error-border');
-            isValid = false;
-        } else {
-            els.inpPhone.classList.remove('error-border');
-        }
+        if (rawPhone.length < 11) { els.inpPhone.classList.add('error-border'); isValid = false; }
+        else els.inpPhone.classList.remove('error-border');
 
         if (!isValid) {
-            els.bContact.scrollIntoView({behavior: 'smooth'});
+            const firstError = document.querySelector('.error-border');
+            if(firstError) firstError.scrollIntoView({behavior: 'smooth', block: 'center'});
             return;
         }
 
-        const data = await api('getCode', {
+        const jsonResponse = await api('getCode', {
             clienttype: booking.clienttype,
             territori: booking.territori,
             office: booking.office,
@@ -652,10 +691,11 @@ const App = (function() {
             fio: booking.fio
         });
 
-        if(data) {
-            console.log("SMS Code (Dev):", data.code);
+        if (jsonResponse && jsonResponse.result === 'success') {
+            console.log("Full SMS Response:", jsonResponse);
             els.btnGetCode.classList.add('hidden');
             els.smsArea.classList.remove('hidden');
+            setTimeout(() => els.inpCode.focus(), 100);
         }
     }
 
@@ -677,21 +717,25 @@ const App = (function() {
         });
 
         if(data) {
-            els.bClient.parentElement.classList.add('hidden'); 
             document.getElementById('res-talon').textContent = data.talon;
             document.getElementById('res-date').textContent = data.date;
             document.getElementById('res-time').textContent = data.time;
             document.getElementById('res-addr').textContent = data.office || data.adress;
             
-            Array.from(document.querySelectorAll('.section-block')).forEach(el => el.classList.add('hidden'));
+            const allBlocks = document.querySelectorAll('.section-block');
+            allBlocks.forEach(el => el.classList.add('hidden'));
+
             els.bSuccess.classList.remove('hidden');
+            
             window.scrollTo(0,0);
         }
     }
 
-    function fillSelect(sel, map) {
-        sel.innerHTML = '<option value="">-- Выберите --</option>';
-        for(let [k,v] of Object.entries(map)) {
+    function fillSelectSorted(sel, map) {
+        sel.innerHTML = '<option value="">Выберите</option>';
+        let items = Object.entries(map);
+        items.sort((a, b) => a[1].localeCompare(b[1]));
+        for(let [k,v] of items) {
             let opt = document.createElement('option');
             opt.value = k;
             opt.textContent = v;
