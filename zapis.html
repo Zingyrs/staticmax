@@ -606,7 +606,7 @@
                 theme: null, date: null, time: null,
                 fio: null, phone: null, email: null,
                 ls: null, address: null, inn: null, organisation: null,
-                dtremind: null
+                dt_remind: null
             };
 
             const els = {
@@ -714,7 +714,7 @@
                 // Скрываем блок напоминания
                 els.bRemind.classList.add('hidden');
                 if(els.selRemind) els.selRemind.innerHTML = '';
-                booking.dtremind = null;
+                booking.dt_remind = null;
 
                 // Скрываем предупреждение об отсутствии дат
                 els.noDatesMsg.classList.add('hidden');
@@ -875,7 +875,7 @@
 
                 fillSelect(els.selRemind, data, 'Не выбрано');
                 els.selRemind.onchange = () => {
-                    booking.dtremind = els.selRemind.value;
+                    booking.dt_remind = els.selRemind.value;
                 };
                 els.bRemind.classList.remove('hidden');
                 showContact();
