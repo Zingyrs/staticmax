@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#F8FAFC">
+    <title>Отмена записи</title>
+    <style>
+        :root {
+            --rh-blue: #0066A6;
+            --rh-orange: #E66A25;
+            --rh-blue-pastel: #EAF3FB;
+            --rh-orange-pastel: #FFF3E8;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --border-color: #E2E8F0;
+            --group-bg: rgba(255, 255, 255, 0.6);
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-size-title: max(14px, 2vh);
+            --font-size-desc: max(11px, 1.4vh);
+            --font-size-small: max(10px, 1.2vh);
+            --radius-card: 16px;
+            --radius-icon: 12px;
+            --radius-form: 12px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0F172A;
+                --card-bg: #1E293B;
+                --text-primary: #F1F5F9;
+                --text-secondary: #94A3B8;
+                --border-color: #334155;
+                --rh-blue-pastel: #1E3A5F;
+                --rh-orange-pastel: #3D2A1F;
+                --group-bg: rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            background-color: var(--bg-color);
+            font-family: var(--font-family);
+        }
+
+        .app {
+            height: 100dvh;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-right));
+        }
+
+        .logo-container {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 2vh;
+            min-height: 60px;
+        }
+
+        .logo {
+            max-height: 5vh;
+            width: auto;
+            max-width: 80%;
+        }
+
+        .form-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .page-title {
+            font-size: var(--font-size-title);
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 2vh;
+        }
+
+        .section-block {
+            margin-bottom: 20px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .section-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .section-block.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .label-title {
+            font-size: var(--font-size-desc);
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-form);
+            font-size: var(--font-size-title);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--rh-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px var(--rh-blue-pastel);
+        }
+
+        .error-border {
+            border-color: var(--rh-orange) !important;
+        }
+
+        .btn-primary, .btn-sms {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: var(--radius-form);
+            font-size: var(--font-size-title);
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+
+        .btn-primary:active, .btn-sms:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--rh-orange);
+            color: #fff;
+        }
+
+        .btn-sms {
+            background: var(--rh-blue);
+            color: #fff;
+        }
+
+        .btn-sms:disabled,
+        .btn-primary:disabled {
+            background: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-sms:disabled:active,
+        .btn-primary:disabled:active {
+            transform: none;
+        }
+
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+            flex-direction: column;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--rh-blue);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error-msg {
+            background: var(--rh-orange-pastel);
+            color: var(--rh-orange);
+            padding: 12px;
+            border-radius: var(--radius-form);
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success-box {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-icon {
+            font-size: 48px;
+            color: var(--rh-orange);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .success-box h2 {
+            color: var(--text-primary);
+            font-size: calc(var(--font-size-title) + 4px);
+            margin-bottom: 15px;
+        }
+
+        .search-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-secondary);
+            font-size: var(--font-size-desc);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--rh-blue);
+            border-bottom-color: var(--rh-blue);
+        }
+
+        .tab-btn:hover {
+            color: var(--rh-blue);
+        }
+
+        .search-method {
+            display: none;
+        }
+
+        .search-method.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .appointment-card {
+            background: var(--rh-blue-pastel);
+            padding: 15px;
+            border-radius: var(--radius-form);
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            border-color: var(--rh-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 166, 0.2);
+        }
+
+        .appointment-card.selected {
+            border-color: var(--rh-blue);
+            background: var(--rh-blue);
+            color: #fff;
+        }
+
+        .appointment-card p {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: var(--font-size-desc);
+        }
+
+        .appointment-card.selected p {
+            color: #fff;
+        }
+
+        .appointment-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .appointment-card strong {
+            color: var(--rh-blue);
+        }
+
+        .appointment-card.selected strong {
+            color: #fff;
+        }
+
+        .appointment-info {
+            background: var(--rh-blue-pastel);
+            padding: 20px;
+            border-radius: var(--radius-card);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .appointment-info p {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-size: var(--font-size-desc);
+        }
+
+        .appointment-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .appointment-info strong {
+            color: var(--text-secondary);
+        }
+
+        .appointments-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .info-text {
+            background: var(--rh-orange-pastel);
+            border: 1px solid var(--rh-orange);
+            color: var(--rh-orange);
+            padding: 12px;
+            border-radius: var(--radius-form);
+            margin-bottom: 20px;
+            font-size: var(--font-size-desc);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="logo-container">
+            <a href="index.html" style="display: flex; align-items: center; justify-content: center;">
+                <img src="logo.svg" alt="Логотип" class="logo">
+            </a>
+        </div>
+        <div class="form-wrapper">
+            <h1 class="page-title">Отмена записи</h1>
+
+            <!-- Лоадер -->
+            <div id="loading" class="loader-overlay hidden">
+                <div class="spinner"></div>
+                <p style="font-size:13px; color:white; margin-top:10px">Загрузка...</p>
+            </div>
+
+            <!-- Шаг 1: Поиск записи -->
+            <div id="step1" class="section-block">
+                <!-- Табы выбора метода поиска -->
+                <div class="search-tabs">
+                    <button class="tab-btn active" onclick="switchSearchMethod('phone')">По телефону</button>
+                    <button class="tab-btn" onclick="switchSearchMethod('talon')">По талону</button>
+                </div>
+
+                <!-- Поиск по телефону -->
+                <div id="searchByPhone" class="search-method active">
+                    <span class="label-title">Номер телефона</span>
+                    <input type="tel" id="phone" class="form-input" placeholder="Телефон: +7 (9__) ___-__-__" maxlength="18">
+                    <span class="label-title">ФИО (необязательно)</span>
+                    <input type="text" id="fio" class="form-input" placeholder="Иванов Иван Иванович">
+                </div>
+
+                <!-- Поиск по талону -->
+                <div id="searchByTalon" class="search-method">
+                    <span class="label-title">Номер талона</span>
+                    <input type="text" id="talon" class="form-input" placeholder="O153" maxlength="10">
+                    <span class="label-title">Дата записи</span>
+                    <input type="date" id="appointmentDate" class="form-input">
+                </div>
+
+                <div id="error1" class="error-msg hidden"></div>
+                <button class="btn-primary" onclick="searchAppointment()">Найти запись</button>
+            </div>
+
+            <!-- Шаг 1.5: Выбор записи из списка -->
+            <div id="step1_5" class="section-block hidden">
+                <p style="margin-bottom: 20px; text-align: center; color: var(--text-secondary); font-size: var(--font-size-desc);">
+                    Найдено несколько записей. Выберите нужную:
+                </p>
+                <div class="appointments-list" id="appointmentsList"></div>
+                <div id="error1_5" class="error-msg hidden"></div>
+                <button class="btn-primary" onclick="selectAppointment()">Продолжить</button>
+                <button class="btn-sms" onclick="goToStep(1)">Назад</button>
+            </div>
+
+            <!-- Шаг 2: Подтверждение записи -->
+            <div id="step2" class="section-block hidden">
+                <div class="appointment-info" id="appointmentInfo"></div>
+                <div id="error2" class="error-msg hidden"></div>
+                <button class="btn-primary" onclick="requestCancelCode()">Отменить запись</button>
+                <button class="btn-sms" onclick="goToStep(1)">Назад</button>
+            </div>
+
+            <!-- Шаг 3: Ввод кода -->
+            <div id="step3" class="section-block hidden">
+                <div class="info-text">
+                    📱 На ваш телефон отправлен код подтверждения
+                </div>
+                <span class="label-title">Код из СМС</span>
+                <input type="text" id="code" class="form-input" placeholder="Введите код" maxlength="6">
+                <div id="error3" class="error-msg hidden"></div>
+                <button class="btn-primary" onclick="cancelAppointment()">Подтвердить отмену</button>
+                <button class="btn-sms" onclick="goToStep(2)">Назад</button>
+            </div>
+
+            <!-- Шаг 4: Успешная отмена -->
+            <div id="step4" class="section-block hidden">
+                <div class="success-box">
+                    <span class="success-icon">✓</span>
+                    <h2 style="margin:0; color:var(--text-primary);">Запись отменена</h2>
+                    <p style="color: var(--text-secondary); margin-top: 10px;">Ваша запись успешно отменена</p>
+                </div>
+                <button class="btn-primary" onclick="location.reload()">Отменить другую запись</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://testapi.krsk-sbit.ru/new_mobile_api/app.php';
+        let currentAppointment = null;
+        let allAppointments = [];
+        let receivedCode = null;
+        let selectedAppointmentIndex = null;
+        let currentSearchMethod = 'phone';
+
+        // Умная маска для телефона
+        const phoneInp = document.getElementById('phone');
+        phoneInp.addEventListener('input', function(e) {
+            let inputValue = e.target.value;
+            let v = inputValue.replace(/\D/g, '');
+            
+            // Если поле пустое - очищаем
+            if (v.length === 0) {
+                e.target.value = '';
+                return;
+            }
+            
+            // Нормализация: приводим к формату 7XXXXXXXXXX
+            if (v.startsWith('8')) {
+                v = '7' + v.substring(1);
+            } else if (!v.startsWith('7')) {
+                v = '7' + v;
+            }
+            
+            // Ограничиваем до 11 цифр (7 + 10 цифр номера)
+            v = v.substring(0, 11);
+
+            // Форматируем номер
+            let res = '+7';
+            if (v.length > 1) {
+                res += ' (' + v.substring(1, 4);
+                if (v.length >= 5) {
+                    res += ') ' + v.substring(4, 7);
+                    if (v.length >= 8) {
+                        res += '-' + v.substring(7, 9);
+                        if (v.length >= 10) {
+                            res += '-' + v.substring(9, 11);
+                        }
+                    }
+                }
+            }
+            
+            // Обновляем значение
+            if (e.target.value !== res) {
+                e.target.value = res;
+                // Ставим курсор в конец
+                e.target.setSelectionRange(res.length, res.length);
+            }
+        });
+
+        phoneInp.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && e.target.value.length <= 4) {
+                e.target.value = '';
+            }
+        });
+
+        function switchSearchMethod(method) {
+            currentSearchMethod = method;
+            
+            // Переключение табов
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Переключение форм
+            document.querySelectorAll('.search-method').forEach(form => form.classList.remove('active'));
+            if (method === 'phone') {
+                document.getElementById('searchByPhone').classList.add('active');
+            } else {
+                document.getElementById('searchByTalon').classList.add('active');
+            }
+        }
+
+        function showError(step, message) {
+            const errorEl = document.getElementById(`error${step}`);
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+
+        function hideError(step) {
+            const errorEl = document.getElementById(`error${step}`);
+            if (errorEl) {
+                errorEl.classList.add('hidden');
+            }
+        }
+
+        function goToStep(stepNumber) {
+            document.querySelectorAll('.section-block').forEach(el => el.classList.add('hidden'));
+            const stepId = stepNumber === 1.5 ? 'step1_5' : `step${stepNumber}`;
+            document.getElementById(stepId).classList.remove('hidden');
+            hideError(stepNumber === 1.5 ? '1_5' : stepNumber);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('hidden', !show);
+            document.querySelectorAll('.section-block').forEach(el => {
+                if (show) el.classList.add('hidden');
+            });
+        }
+
+        function formatDateForAPI(dateString) {
+            // Преобразуем yyyy-mm-dd в dd.mm.yyyy
+            const [year, month, day] = dateString.split('-');
+            return `${day}.${month}.${year}`;
+        }
+
+        async function searchAppointment() {
+            hideError(1);
+            
+            const formData = new URLSearchParams();
+            
+            if (currentSearchMethod === 'phone') {
+                const phoneValue = document.getElementById('phone').value.trim();
+                const phone = phoneValue.replace(/[\s\(\)-]/g, '');
+                const fio = document.getElementById('fio').value.trim();
+
+                if (!phone || phone.length < 12) {
+                    showError(1, 'Введите корректный номер телефона');
+                    return;
+                }
+
+                formData.append('phone', phone);
+                if (fio) formData.append('fio', fio);
+                
+            } else {
+                const talon = document.getElementById('talon').value.trim();
+                const appointmentDate = document.getElementById('appointmentDate').value;
+
+                if (!talon) {
+                    showError(1, 'Введите номер талона');
+                    return;
+                }
+
+                if (!appointmentDate) {
+                    showError(1, 'Выберите дату записи');
+                    return;
+                }
+
+                formData.append('talon', talon);
+                formData.append('date', formatDateForAPI(appointmentDate));
+            }
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`${API_URL}?action=ochered&source=bitrix&method=getAppiontment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Полный ответ API:', result);
+                
+                showLoading(false);
+
+                if (result.result === 'success' && result.data) {
+                    if (Array.isArray(result.data)) {
+                        allAppointments = result.data;
+                        if (allAppointments.length === 1) {
+                            currentAppointment = allAppointments[0];
+                            displayAppointmentInfo();
+                            goToStep(2);
+                        } else {
+                            displayAppointmentsList();
+                            goToStep(1.5);
+                        }
+                    } else {
+                        currentAppointment = result.data;
+                        displayAppointmentInfo();
+                        goToStep(2);
+                    }
+                } else {
+                    showError(1, result.errors?.message || 'Запись не найдена');
+                    goToStep(1);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showLoading(false);
+                showError(1, 'Ошибка соединения с сервером');
+                goToStep(1);
+            }
+        }
+
+        function displayAppointmentsList() {
+            const listEl = document.getElementById('appointmentsList');
+            listEl.innerHTML = '';
+            
+            allAppointments.forEach((app, index) => {
+                const card = document.createElement('div');
+                card.className = 'appointment-card';
+                card.onclick = () => toggleAppointmentSelection(index);
+                card.innerHTML = `
+                    <p><strong>Дата:</strong> ${app.date} в ${app.time}</p>
+                    <p><strong>Тема:</strong> ${app.theme || 'Не указано'}</p>
+                    <p><strong>Офис:</strong> ${app.office || 'Не указано'}</p>
+                    <p><strong>Талон:</strong> ${app.talon}</p>
+                `;
+                listEl.appendChild(card);
+            });
+        }
+
+        function toggleAppointmentSelection(index) {
+            selectedAppointmentIndex = index;
+            const cards = document.querySelectorAll('.appointment-card');
+            cards.forEach((card, i) => {
+                if (i === index) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        function selectAppointment() {
+            hideError('1_5');
+            if (selectedAppointmentIndex === null) {
+                showError('1_5', 'Выберите запись для отмены');
+                return;
+            }
+            currentAppointment = allAppointments[selectedAppointmentIndex];
+            displayAppointmentInfo();
+            goToStep(2);
+        }
+
+        function displayAppointmentInfo() {
+            const info = document.getElementById('appointmentInfo');
+            
+            info.innerHTML = `
+                <p><strong>ФИО:</strong> ${currentAppointment.fio || 'Не указано'}</p>
+                <p><strong>Офис:</strong> ${currentAppointment.office || 'Не указано'}</p>
+                <p><strong>Дата:</strong> ${currentAppointment.date || 'Не указано'}</p>
+                <p><strong>Время:</strong> ${currentAppointment.time || 'Не указано'}</p>
+                <p><strong>Тема:</strong> ${currentAppointment.theme || 'Не указано'}</p>
+                <p><strong>Талон:</strong> ${currentAppointment.talon || 'Не указано'}</p>
+            `;
+        }
+
+        async function requestCancelCode() {
+            hideError(2);
+            showLoading(true);
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('id', currentAppointment.id);
+                formData.append('phone', currentAppointment.phone);
+
+                console.log('Запрос кода отмены для ID:', currentAppointment.id, 'Phone:', currentAppointment.phone);
+
+                const response = await fetch(`${API_URL}?action=ochered&source=bitrix&method=getCancelCode`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const text = await response.text();
+                console.log('Сырой ответ getCancelCode:', text);
+
+                // Извлекаем JSON из конца ответа (после XML)
+                const jsonMatch = text.match(/\{.*\}$/);
+                if (!jsonMatch) {
+                    throw new Error('Не удалось найти JSON в ответе сервера');
+                }
+
+                const result = JSON.parse(jsonMatch[0]);
+                console.log('Распознанный JSON:', result);
+                showLoading(false);
+
+                if (result.result === 'success') {
+                    receivedCode = result.data.toString();
+                    console.log('Ожидаемый код:', receivedCode);
+                    
+                    goToStep(3);
+                } else {
+                    showError(2, result.errors?.message || 'Ошибка получения кода');
+                    goToStep(2);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showLoading(false);
+                showError(2, error.message || 'Ошибка соединения с сервером');
+                goToStep(2);
+            }
+        }
+
+        async function cancelAppointment() {
+            hideError(3);
+            const enteredCode = document.getElementById('code').value.trim();
+
+            if (!enteredCode) {
+                showError(3, 'Введите код из СМС');
+                return;
+            }
+
+            console.log('Введенный код:', enteredCode, 'Ожидаемый код:', receivedCode);
+
+            if (enteredCode !== receivedCode) {
+                showError(3, 'Неверный код подтверждения');
+                return;
+            }
+
+            showLoading(true);
+
+            try {
+                const formData = new URLSearchParams();
+                formData.append('id', currentAppointment.id);
+
+                console.log('Отмена записи ID:', currentAppointment.id);
+
+                const response = await fetch(`${API_URL}?action=ochered&source=bitrix&method=cancelAppiontment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Ответ cancelAppiontment:', result);
+                showLoading(false);
+
+                if (result.result === 'success') {
+                    goToStep(4);
+                } else {
+                    showError(3, result.errors?.message || 'Ошибка отмены записи');
+                    goToStep(3);
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showLoading(false);
+                showError(3, 'Ошибка соединения с сервером');
+                goToStep(3);
+            }
+        }
+    </script>
+</body>
+</html>
