@@ -363,10 +363,32 @@
         <!-- 7. КОНТАКТЫ -->
         <div id="block-contact" class="section-block hidden">
             <span class="label-title">7. Ваши данные</span>
+
             <input type="text" id="inp-fio" class="form-input" placeholder="ФИО*" required>
             <input type="tel" id="inp-phone" class="form-input" placeholder="+7 (9__) ___-__-__" maxlength="18" required>
             <input type="email" id="inp-email" class="form-input" placeholder="Email">
+
+            <!-- Поля для частного клиента (скрыты по умолчанию) -->
+            <div id="private-fields" class="hidden">
+                <input type="text" id="inp-ls-private" class="form-input" placeholder="Лицевой счет">
+                <input type="text" id="inp-address" class="form-input" placeholder="Адрес">
+            </div>
+
+            <!-- Поля для корпоративного клиента (скрыты по умолчанию) -->
+            <div id="corporate-fields" class="hidden">
+                <input type="text" id="inp-org" class="form-input" placeholder="Название организации*">
+                <input type="text" id="inp-inn" class="form-input" placeholder="ИНН*">
+                <input type="text" id="inp-ls-corporate" class="form-input" placeholder="Номер договора (абонента)*">
+            </div>
             
+            <!-- НОВОЕ ПОЛЕ: НАПОМНИТЬ О ЗАПИСИ -->
+            <div id="block-remind" class="section-block hidden" style="margin-bottom: 10px; border-bottom: none;">
+                <span class="label-title">8. Напомнить о записи</span>
+                <div class="select-wrapper">
+                    <select id="sel-remind" class="form-select"></select>
+                </div>
+            </div>
+
             <button id="btn-get-code" class="btn-sms" onclick="App.sendSms()">Получить код подтверждения</button>
 
             <div id="sms-area" class="hidden" style="margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
@@ -429,7 +451,8 @@ const App = (function() {
     let booking = {
         clienttype: null, territori: null, office: null,
         theme: null, date: null, time: null,
-        fio: null, phone: null, email: null
+        fio: null, phone: null, email: null,
+        ls: null, address: null, inn: null, organisation: null, dt_remind: null
     };
 
     const els = {
@@ -441,6 +464,7 @@ const App = (function() {
         bTheme: document.getElementById('block-theme'),
         bDate: document.getElementById('block-date'),
         bTime: document.getElementById('block-time'),
+        bRemind: document.getElementById('block-remind'),
         bContact: document.getElementById('block-contact'),
         bSuccess: document.getElementById('block-success'),
         listClient: document.getElementById('list-client'),
@@ -449,12 +473,20 @@ const App = (function() {
         selTheme: document.getElementById('sel-theme'),
         listDate: document.getElementById('list-date'),
         listTime: document.getElementById('list-time'),
+        selRemind: document.getElementById('sel-remind'),
         inpFio: document.getElementById('inp-fio'),
         inpPhone: document.getElementById('inp-phone'),
         inpEmail: document.getElementById('inp-email'),
         btnGetCode: document.getElementById('btn-get-code'),
         smsArea: document.getElementById('sms-area'),
-        inpCode: document.getElementById('inp-code')
+        inpCode: document.getElementById('inp-code'),
+        privateFields: document.getElementById('private-fields'),
+        corporateFields: document.getElementById('corporate-fields'),
+        inpLsPrivate: document.getElementById('inp-ls-private'),
+        inpAddress: document.getElementById('inp-address'),
+        inpOrg: document.getElementById('inp-org'),
+        inpInn: document.getElementById('inp-inn'),
+        inpLsCorporate: document.getElementById('inp-ls-corporate')
     };
 
     async function api(method, params = {}) {
@@ -525,6 +557,11 @@ const App = (function() {
             if(blocks[i].key) booking[blocks[i].key] = null;
         }
         
+        // Также сбрасываем напоминание и доп. поля
+        els.bRemind.classList.add('hidden');
+        if(els.selRemind) els.selRemind.innerHTML = '';
+        booking.dt_remind = null;
+
         els.smsArea.classList.add('hidden');
         els.btnGetCode.classList.remove('hidden');
     }
@@ -542,7 +579,18 @@ const App = (function() {
                 document.querySelectorAll('#list-client .selection-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 booking.clienttype = id;
+                
                 resetBelow(0);
+
+                // Показываем/скрываем доп. поля
+                if (id === '1') { // Частный клиент
+                    els.privateFields.classList.remove('hidden');
+                    els.corporateFields.classList.add('hidden');
+                } else if (id === '2') { // Корпоративный клиент
+                    els.privateFields.classList.add('hidden');
+                    els.corporateFields.classList.remove('hidden');
+                }
+
                 loadTerritories();
             };
             els.listClient.appendChild(btn);
@@ -615,7 +663,6 @@ const App = (function() {
             let btn = document.createElement('div');
             btn.className = 'grid-btn';
             
-            // Форматируем дату в ДД.ММ.ГГ
             const parts = txt.split('.');
             const shortDate = `${parts[0]}.${parts[1]}.${parts[2].slice(-2)}`;
             btn.textContent = shortDate;
@@ -652,11 +699,30 @@ const App = (function() {
                 btn.classList.add('selected');
                 booking.time = val;
                 resetBelow(5);
-                showContact();
+                loadReminders(); // Загружаем напоминания
             };
             els.listTime.appendChild(btn);
         }
         els.bTime.classList.remove('hidden');
+    }
+
+    async function loadReminders() {
+        const data = await api('getRemind', {
+            clienttype: booking.clienttype,
+            territori: booking.territori,
+            office: booking.office,
+            theme: booking.theme,
+            date: booking.date,
+            time: booking.time
+        });
+        if(!data) return;
+
+        fillSelect(els.selRemind, data, "Не напоминать");
+        els.selRemind.onchange = () => {
+            booking.dt_remind = els.selRemind.value;
+        };
+        els.bRemind.classList.remove('hidden');
+        showContact();
     }
 
     function showContact() {
@@ -665,19 +731,28 @@ const App = (function() {
     }
 
     async function sendSms() {
-        let rawPhone = els.inpPhone.value.replace(/[ \(\)-]/g, ''); 
-        if (rawPhone.startsWith('+7')) rawPhone = '8' + rawPhone.substring(2);
-        else if (rawPhone.startsWith('7')) rawPhone = '8' + rawPhone.substring(1);
-
+        // Собираем все данные из формы в объект booking
         booking.fio = els.inpFio.value.trim();
-        booking.phone = rawPhone;
+        booking.phone = els.inpPhone.value.replace(/[ \(\)-]/g, '');
         booking.email = els.inpEmail.value.trim();
+        
+        if (booking.clienttype === '1') { // Частный
+            booking.ls = els.inpLsPrivate.value.trim();
+            booking.address = els.inpAddress.value.trim();
+            booking.organisation = null;
+            booking.inn = null;
+        } else if (booking.clienttype === '2') { // Корпоративный
+            booking.organisation = els.inpOrg.value.trim();
+            booking.inn = els.inpInn.value.trim();
+            booking.ls = els.inpLsCorporate.value.trim();
+            booking.address = null;
+        }
 
         let isValid = true;
         if (!booking.fio) { els.inpFio.classList.add('error-border'); isValid = false; }
         else els.inpFio.classList.remove('error-border');
 
-        if (rawPhone.length < 11) { els.inpPhone.classList.add('error-border'); isValid = false; }
+        if (booking.phone.length < 12) { els.inpPhone.classList.add('error-border'); isValid = false; }
         else els.inpPhone.classList.remove('error-border');
 
         if (!isValid) {
@@ -687,15 +762,8 @@ const App = (function() {
         }
 
         const jsonResponse = await api('getCode', {
-            clienttype: booking.clienttype,
-            territori: booking.territori,
-            office: booking.office,
-            theme: booking.theme,
-            date: booking.date,
-            time: booking.time,
-            phone: booking.phone,
-            email: booking.email,
-            fio: booking.fio
+            ...booking,
+            phone: booking.phone.replace('+7', '8') // API требует 8-ку
         });
 
         if (jsonResponse && jsonResponse.result === 'success') {
@@ -711,15 +779,8 @@ const App = (function() {
         if(!code) return alert("Введите код");
 
         const data = await api('setAppiontment', {
-            clienttype: booking.clienttype,
-            territori: booking.territori,
-            office: booking.office,
-            theme: booking.theme,
-            date: booking.date,
-            time: booking.time,
-            phone: booking.phone,
-            email: booking.email,
-            fio: booking.fio,
+            ...booking,
+            phone: booking.phone.replace('+7', '8'), // API требует 8-ку
             code: code
         });
 
@@ -736,6 +797,17 @@ const App = (function() {
             
             window.scrollTo(0,0);
         }
+    }
+
+    function fillSelect(sel, map, defaultOptionText = "Выберите") {
+        sel.innerHTML = `<option value="">${defaultOptionText}</option>`;
+        for(let [k,v] of Object.entries(map)) {
+            let opt = document.createElement('option');
+            opt.value = v; // В getRemind значением является дата-время
+            opt.textContent = k;
+            sel.appendChild(opt);
+        }
+        sel.value = "";
     }
 
     function fillSelectSorted(sel, map) {
