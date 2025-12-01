@@ -481,7 +481,7 @@
                 <div id="corporate-fields" class="hidden">
                     <input type="text" id="inp-org" class="form-input" placeholder="Название организации">
                     <input type="text" id="inp-inn" class="form-input" placeholder="ИНН">
-                    <input type="text" id="inp-ls-corporate" class="form-input" placeholder="Номер лицевого счета">
+                    <input type="text" id="inp-ls-corporate" class="form-input" placeholder="Номер договора (абонента)">
                 </div>
 
                 <!-- 8. Напомнить о записи -->
@@ -505,7 +505,7 @@
             <div id="block-success" class="section-block hidden">
                 <div class="success-box">
                     <span class="success-icon">✔</span>
-                    <h2 style="margin:0; color:var(--text-primary);">Вы записаны!</h2>
+                    <h2 style="margin:0; color:var(--text-primary);">Вы успешно записаны!</h2>
                     <div class="ticket-info">
                         <p><strong>Талон:</strong> <span id="res-talon" class="ticket-highlight"></span></p>
                         <hr style="border:0; border-top:1px solid var(--border-color); margin:10px 0;">
@@ -533,17 +533,47 @@
         }
         
         phoneInp.addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, '');
-            if (v.match(/^[789]/)) v = '7' + v.substring(1);
-            else if (v.length > 0) v = '7' + v;
+            let inputValue = e.target.value;
+            let v = inputValue.replace(/\D/g, '');
+            
+            // Если поле пустое - очищаем
+            if (v.length === 0) {
+                e.target.value = '';
+                updatePhoneButtonState('');
+                return;
+            }
+            
+            // Нормализация: приводим к формату 7XXXXXXXXXX
+            if (v.startsWith('8')) {
+                v = '7' + v.substring(1);
+            } else if (!v.startsWith('7')) {
+                v = '7' + v;
+            }
+            
+            // Ограничиваем до 11 цифр (7 + 10 цифр номера)
+            v = v.substring(0, 11);
 
-            let res = '';
-            if (v.length > 0) res = '+7';
-            if (v.length > 1) res += ' (' + v.substring(1, 4);
-            if (v.length >= 5) res += ') ' + v.substring(4, 7);
-            if (v.length >= 8) res += '-' + v.substring(7, 9);
-            if (v.length >= 10) res += '-' + v.substring(9, 11);
-            e.target.value = res;
+            // Форматируем номер
+            let res = '+7';
+            if (v.length > 1) {
+                res += ' (' + v.substring(1, 4);
+                if (v.length >= 5) {
+                    res += ') ' + v.substring(4, 7);
+                    if (v.length >= 8) {
+                        res += '-' + v.substring(7, 9);
+                        if (v.length >= 10) {
+                            res += '-' + v.substring(9, 11);
+                        }
+                    }
+                }
+            }
+            
+            // Обновляем значение
+            if (e.target.value !== res) {
+                e.target.value = res;
+                // Ставим курсор в конец
+                e.target.setSelectionRange(res.length, res.length);
+            }
 
             if (res.length > 5) {
                 phoneInp.classList.remove('error-border');
