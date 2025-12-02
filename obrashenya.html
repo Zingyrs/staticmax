@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Передача показаний (testapi)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 20px;
+            background: #f5f7fa;
+            color: #222;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            max-width: 260px;
+            padding: 6px 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            background: #2563eb;
+            color: #fff;
+        }
+        button[disabled] {
+            opacity: 0.6;
+            cursor: default;
+        }
+        .small {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .status {
+            margin-top: 8px;
+            font-size: 13px;
+            white-space: pre-wrap;
+        }
+        .status.error {
+            color: #b91c1c;
+        }
+        .status.success {
+            color: #166534;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 4px 6px;
+            text-align: left;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 3px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Передача показаний ПУ (testapi.krsk-sbit.ru)</h1>
+
+    <div class="card">
+        <label for="ls">Лицевой счёт (12 цифр):</label>
+        <input type="text" id="ls" maxlength="12" placeholder="Например, 123456789012">
+        <button id="loadPointsBtn">Загрузить точки учёта</button>
+        <div class="small">
+            Используется тестовый API: https://testapi.krsk-sbit.ru/?route=api/transmission_indication/v970&ls=... (Basic Auth: пользователь <code>test krsk</code>).
+        </div>
+        <div id="globalStatus" class="status"></div>
+    </div>
+
+    <div class="card" id="pointsCard" style="display:none;">
+        <div id="addressBlock" class="small" style="margin-bottom: 8px;"></div>
+        <div class="small">
+            Для каждой точки учёта введите новые показания и нажмите «Отправить». Параметры запроса: <code>num_tu</code>, <code>new_indication</code>, <code>ext_trans_factor</code>.
+        </div>
+        <div id="pointsContainer"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://testapi.krsk-sbit.ru/';
+        const AUTH_HEADER = 'Basic ' + btoa('test krsk:'); // логин "test krsk", пустой пароль
+
+        const lsInput = document.getElementById('ls');
+        const loadPointsBtn = document.getElementById('loadPointsBtn');
+        const globalStatus = document.getElementById('globalStatus');
+        const pointsCard = document.getElementById('pointsCard');
+        const pointsContainer = document.getElementById('pointsContainer');
+        const addressBlock = document.getElementById('addressBlock');
+
+        let lastPoints = [];
+
+        function setGlobalStatus(message, type = '') {
+            globalStatus.textContent = message || '';
+            globalStatus.className = 'status ' + (type || '');
+        }
+
+        function createStatusSpan() {
+            const span = document.createElement('div');
+            span.className = 'status';
+            return span;
+        }
+
+        async function loadPoints() {
+            const ls = lsInput.value.trim();
+            if (!/^\d{12}$/.test(ls)) {
+                setGlobalStatus('Введите корректный ЛС из 12 цифр.', 'error');
+                return;
+            }
+
+            setGlobalStatus('Загрузка данных по ЛС ' + ls + ' ...');
+            pointsCard.style.display = 'none';
+            pointsContainer.innerHTML = '';
+            addressBlock.textContent = '';
+            lastPoints = [];
+
+            loadPointsBtn.disabled = true;
+
+            try {
+                const url = API_BASE + '?route=' + encodeURIComponent('api/transmission_indication/v970') +
+                    '&ls=' + encodeURIComponent(ls);
+
+                const resp = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': AUTH_HEADER
+                    }
+                });
+
+                if (!resp.ok) {
+                    setGlobalStatus('HTTP ошибка: ' + resp.status + ' ' + resp.statusText, 'error');
+                    return;
+                }
+
+                const data = await resp.json();
+
+                if (data.result !== 'success') {
+                    // content может быть строкой или объектом с message
+                    let msg = '';
+                    if (typeof data.content === 'string') {
+                        msg = data.content;
+                    } else if (data.content && data.content.message) {
+                        msg = data.content.message;
+                    } else {
+                        msg = JSON.stringify(data.content);
+                    }
+                    setGlobalStatus('Ошибка ответа API (' + data.result + '): ' + msg, 'error');
+                    return;
+                }
+
+                const content = data.content || {};
+                const address = content.address || '';
+                const points = Array.isArray(content.points) ? content.points : [];
+
+                lastPoints = points;
+
+                if (address) {
+                    addressBlock.textContent = 'Адрес: ' + address;
+                } else {
+                    addressBlock.textContent = 'Адрес не указан в ответе.';
+                }
+
+                if (!points.length) {
+                    pointsContainer.innerHTML = '<div class="small">Для данного ЛС точки учёта не найдены.</div>';
+                } else {
+                    renderPointsTable(ls, points);
+                }
+
+                pointsCard.style.display = 'block';
+                setGlobalStatus('Данные успешно загружены. Найдено ТУ: ' + points.length + '.', 'success');
+            } catch (e) {
+                setGlobalStatus('Ошибка при запросе: ' + e.message, 'error');
+            } finally {
+                loadPointsBtn.disabled = false;
+            }
+        }
+
+        function renderPointsTable(ls, points) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            thead.innerHTML = `
+                <tr>
+                    <th>Услуга</th>
+                    <th>№ ТУ</th>
+                    <th>№ ПУ</th>
+                    <th>Последние принятые</th>
+                    <th>Последние переданные</th>
+                    <th>Тарифная зона</th>
+                    <th>Формат показаний</th>
+                    <th>Новые показания</th>
+                    <th>Действие</th>
+                </tr>
+            `;
+
+            points.forEach((p, index) => {
+                const tr = document.createElement('tr');
+
+                const extTransFactor = p.extTransFactor;
+                const isInt = String(extTransFactor) === '0'; // 0 — целые, 1 — дробные
+                const step = isInt ? '1' : '0.001';
+
+                const inputId = 'newInd_' + index;
+                const statusId = 'status_' + index;
+
+                tr.innerHTML = `
+                    <td>${p.ServiceName || ''}</td>
+                    <td>${p.PointNumber || ''}</td>
+                    <td>${p.CounterNumber || ''}</td>
+                    <td>${p.OldIndication != null ? p.OldIndication : ''}</td>
+                    <td>${p.NewIndication != null ? p.NewIndication : ''}</td>
+                    <td>${p.TariffZoneName || ''}</td>
+                    <td>${isInt ? 'Целые (ext_trans_factor=0)' : 'Дробные (ext_trans_factor=1)'}</td>
+                    <td>
+                        <input 
+                            type="number" 
+                            id="${inputId}"
+                            step="${step}"
+                            min="0"
+                            style="width: 120px;"
+                            placeholder="Новое значение">
+                    </td>
+                    <td>
+                        <button type="button" data-row-index="${index}">Отправить</button>
+                        <div id="${statusId}" class="status"></div>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+            pointsContainer.innerHTML = '';
+            pointsContainer.appendChild(table);
+
+            // навешиваем обработчики на кнопки "Отправить"
+            tbody.querySelectorAll('button[data-row-index]').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const rowIndex = parseInt(e.currentTarget.getAttribute('data-row-index'), 10);
+                    const point = lastPoints[rowIndex];
+                    if (!point) return;
+
+                    const input = document.getElementById('newInd_' + rowIndex);
+                    const statusEl = document.getElementById('status_' + rowIndex);
+                    await sendIndication(ls, point, input, statusEl, e.currentTarget);
+                });
+            });
+        }
+
+        async function sendIndication(ls, point, inputEl, statusEl, buttonEl) {
+            const val = inputEl.value.trim();
+            if (!val) {
+                statusEl.textContent = 'Введите новые показания.';
+                statusEl.className = 'status error';
+                return;
+            }
+
+            statusEl.textContent = 'Отправка...';
+            statusEl.className = 'status';
+            buttonEl.disabled = true;
+
+            const body = new URLSearchParams();
+            body.set('num_tu', String(point.PointNumber || ''));
+            body.set('new_indication', val);
+            body.set('ext_trans_factor', String(point.extTransFactor ?? '0'));
+
+            try {
+                const url = API_BASE + '?route=' + encodeURIComponent('api/transmission_indication/v970') +
+                    '&ls=' + encodeURIComponent(ls);
+
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': AUTH_HEADER,
+                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                    },
+                    body: body.toString()
+                });
+
+                if (!resp.ok) {
+                    statusEl.textContent = 'HTTP ошибка: ' + resp.status + ' ' + resp.statusText;
+                    statusEl.className = 'status error';
+                    return;
+                }
+
+                const data = await resp.json();
+
+                if (data.result === 'success') {
+                    let msg = '';
+                    if (Array.isArray(data.content)) {
+                        msg = data.content.join(' ');
+                    } else if (typeof data.content === 'string') {
+                        msg = data.content;
+                    } else {
+                        msg = JSON.stringify(data.content);
+                    }
+                    statusEl.textContent = 'Успешно: ' + msg;
+                    statusEl.className = 'status success';
+                } else {
+                    let msg = '';
+                    if (Array.isArray(data.content)) {
+                        msg = data.content.join(' ');
+                    } else if (typeof data.content === 'string') {
+                        msg = data.content;
+                    } else if (data.content && data.content.message) {
+                        msg = data.content.message;
+                    } else {
+                        msg = JSON.stringify(data.content);
+                    }
+                    statusEl.textContent = 'Ошибка (' + data.result + '): ' + msg;
+                    statusEl.className = 'status error';
+                }
+            } catch (e) {
+                statusEl.textContent = 'Ошибка при запросе: ' + e.message;
+                statusEl.className = 'status error';
+            } finally {
+                buttonEl.disabled = false;
+            }
+        }
+
+        loadPointsBtn.addEventListener('click', loadPoints);
+        lsInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                loadPoints();
+            }
+        });
+    </script>
+</body>
+</html>
